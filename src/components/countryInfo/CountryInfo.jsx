@@ -1,11 +1,10 @@
 // CountryInfo.jsx
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 function CountryInfo() {
-  const { name } = useParams(); // Obtén el parámetro de la ruta (nombre del país)
+  const { name } = useParams(); // Se obtiene el parámetro de la ruta (nombre del país)
   const [countryDetails, setCountryDetails] = useState(null);
-	const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCountryDetails = async () => {
@@ -16,7 +15,7 @@ function CountryInfo() {
         if (data && data.length > 0) {
           setCountryDetails(data[0]);
         } else {
-          // Manejar el caso en el que no se encuentra información para el país
+          // si no se encuentra info para el pais
           console.error(`No se encontró información para el país: ${name}`);
         }
       } catch (error) {
@@ -27,12 +26,7 @@ function CountryInfo() {
     fetchCountryDetails();
   }, [name]);
 
-	const handleGoBack = () => {
-    navigate(-1); // Navegar hacia atrás
-  };
-
   if (!countryDetails) {
-    // Puedes mostrar un indicador de carga o un mensaje de error aquí
     return <div>Cargando...</div>;
   }
 
