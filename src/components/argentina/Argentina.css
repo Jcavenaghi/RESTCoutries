@@ -15,10 +15,10 @@
       transform: scaleY(1);
     }
     25%, 75% {
-      transform: scaleY(0.95) rotate(-3deg);
+      transform: scaleY(0.95) rotate(-2deg);
     }
     50% {
-      transform: scaleY(1.05) rotate(3deg);
+      transform: scaleY(1.05) rotate(2deg);
     }
   }
 
