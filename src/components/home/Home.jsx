@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Home() {
   const [countries, setCountries] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const continents = ['africa', 'americas', 'asia', 'europe', 'oceania'];
   const [selectedContinent, setSelectedContinent] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate(); // Utiliza useNavigate en lugar de useHistory
   const countriesPerPage = 12;
 
   useEffect(() => {
     fetchCountries();
-  }, [currentPage, selectedContinent]);
+  }, [currentPage, selectedContinent, searchTerm]);
 
   const fetchCountries = async () => {
     const startIndex = (currentPage - 1) * countriesPerPage;
@@ -19,7 +21,6 @@ function Home() {
     try {
       let apiUrl = 'https://restcountries.com/v3.1/all';
 
-      // Si se ha seleccionado un continente, ajusta la URL
       if (selectedContinent) {
         apiUrl = `https://restcountries.com/v3.1/region/${selectedContinent}`;
       }
@@ -27,16 +28,36 @@ function Home() {
       const response = await fetch(apiUrl);
       const data = await response.json();
 
-      setCountries(data.slice(startIndex, endIndex));
+      const filteredCountries = searchTerm
+        ? data.filter((country) =>
+            country.name.common.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        : data;
+
+      setCountries(filteredCountries.slice(startIndex, endIndex));
     } catch (error) {
       console.error('Error fetching countries:', error);
+    }
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleSearch = () => {
+    if (searchTerm.trim() !== '') {
+      navigate(`/countryInfo/${searchTerm}`);
+    } else {
+      alert('Por favor, ingresa el nombre de un país.');
     }
   };
 
   return (
     <div className="container mx-auto mt-8">
       <div className="mb-4 text-left">
-        <label htmlFor="continentFilter" className="font-bold mr-2">Filtrar por Continente:</label>
+        <label htmlFor="continentFilter" className="font-bold mr-2">
+          Filtrar por Continente:
+        </label>
         <select
           id="continentFilter"
           value={selectedContinent}
@@ -50,15 +71,36 @@ function Home() {
             </option>
           ))}
         </select>
+          <input
+          type="text"
+          placeholder="Buscar por país..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="border border-gray-400 rounded px-2 py-1 mx-6 text-left"
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {countries.map((country) => (
-          <div key={country.name.common} className="p-4 bg-customBeige rounded-md shadow-md hover:shadow-2xl transition-transform duration-300 transform hover:scale-110 hover:bg-cyan-300">
-            <Link key={country.name.common} to={`/countryInfo/${country.name.common}`}>
-              <h2 className="text-lg font-serif font-semibold mb-2 hover:text-red-600 transition duration-100">{country.name.common}</h2>
+          <div
+            key={country.name.common}
+            className="p-4 bg-customBeige rounded-md shadow-md hover:shadow-2xl transition-transform duration-300 transform hover:scale-110 hover:bg-cyan-300"
+          >
+            <Link
+              key={country.name.common}
+              to={`/countryInfo/${country.name.common}`}
+            >
+              <h2 className="text-lg font-serif font-semibold mb-2 hover:text-red-600 transition duration-100">
+                {country.name.common}
+              </h2>
             </Link>
-            {country.flags && <img src={country.flags.svg} alt={`${country.name.common} flag`} className="w-full h-auto" />}
+            {country.flags && (
+              <img
+                src={country.flags.svg}
+                alt={`${country.name.common} flag`}
+                className="w-full h-auto"
+              />
+            )}
           </div>
         ))}
       </div>
@@ -72,7 +114,7 @@ function Home() {
         </button>
         <button
           onClick={() => setCurrentPage((prev) => prev + 1)}
-          className="bg-customGray text-white hover:bg-gray-800 font-bold py-2 px-4  mx-4 rounded"
+          className="bg-customGray text-white hover:bg-gray-800 font-bold py-2 px-4 mx-4 rounded"
         >
           Siguiente
         </button>
